@@ -6,6 +6,7 @@ FPS = 60
 WIDTH = 500
 HEIGHT = 600
 
+BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
@@ -107,7 +108,7 @@ while running:
     all_sprites.update()
 
     # display game
-    screen.fill(WHITE)
+    screen.fill(BLACK)
     all_sprites.draw(screen)
     pygame.display.update()
 
