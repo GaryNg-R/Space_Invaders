@@ -19,11 +19,22 @@ pygame.display.set_caption('Space Invader')
 clock = pygame.time.Clock()
 
 
+# load img
+background_img = pygame.image.load(
+    os.path.join("img", "background.png")).convert()
+player_img = pygame.image.load(
+    os.path.join("img", "player.png")).convert()
+rock_img = pygame.image.load(
+    os.path.join("img", "rock.png")).convert()
+bullet_img = pygame.image.load(
+    os.path.join("img", "bullet.png")).convert()
+
+
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.Surface((50, 40))
-        self.image.fill(GREEN)
+        self.image = pygame.transform.scale(player_img, (50, 38))
+        self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
         self.rect.centerx = WIDTH/2
         self.rect.bottom = HEIGHT - 10
@@ -114,12 +125,13 @@ while running:
         all_sprites.add(r)
         rocks.add(r)
 
-    is_hit_by_rock = pygame.sprite.spritecollide(player, rocks, False)
-    if is_hit_by_rock:
-        running = False
+    # is_hit_by_rock = pygame.sprite.spritecollide(player, rocks, False)
+    # if is_hit_by_rock:
+    #     running = False
 
     # display game
     screen.fill(BLACK)
+    screen.blit(background_img, (0, 0))
     all_sprites.draw(screen)
     pygame.display.update()
 
