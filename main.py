@@ -103,9 +103,8 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
-                player.shoot()
+        elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+            player.shoot()
 
     # update game
     all_sprites.update()
