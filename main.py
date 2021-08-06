@@ -43,6 +43,7 @@ class Player(pygame.sprite.Sprite):
     def shoot(self):
         bullet = Bullet(self.rect.centerx, self.rect.top)
         all_sprites.add(bullet)
+        bullets.add(bullet)
 
 
 class Rock(pygame.sprite.Sprite):
@@ -84,13 +85,15 @@ class Bullet(pygame.sprite.Sprite):
 
 
 all_sprites = pygame.sprite.Group()
+rocks = pygame.sprite.Group()
+bullets = pygame.sprite.Group()
 player = Player()
 all_sprites.add(player)
 
 for i in range(8):
     rock = Rock()
     all_sprites.add(rock)
-
+    rocks.add(rock)
 running = True
 
 # loop
@@ -106,6 +109,15 @@ while running:
 
     # update game
     all_sprites.update()
+    bullet_hits = pygame.sprite.groupcollide(rocks, bullets, True, True)
+    for hit in bullet_hits:
+        r = Rock()
+        all_sprites.add(r)
+        rocks.add(r)
+
+    is_hit_by_rock = pygame.sprite.spritecollide(player, rocks, False)
+    if is_hit_by_rock:
+        running = False
 
     # display game
     screen.fill(BLACK)
