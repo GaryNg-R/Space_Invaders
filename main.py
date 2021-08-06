@@ -24,10 +24,22 @@ background_img = pygame.image.load(
     os.path.join("img", "background.png")).convert()
 player_img = pygame.image.load(
     os.path.join("img", "player.png")).convert()
-rock_img = pygame.image.load(
-    os.path.join("img", "rock.png")).convert()
 bullet_img = pygame.image.load(
     os.path.join("img", "bullet.png")).convert()
+rock_imgs = []
+for i in range(7):
+    rock_imgs.append(pygame.image.load(
+        os.path.join("img", f"rock{i}.png")).convert())
+font_name = pygame.font.match_font('arial')
+
+
+def draw_text(surf, text, size, x, y):
+    font = pygame.font.Font(font_name, size)
+    text_surface = font.render(text, True, WHITE)
+    text_rect = text_surface.get_rect()
+    text_rect.centerx = x
+    text_rect.top = y
+    surf.blit(text_surface, text_rect)
 
 
 class Player(pygame.sprite.Sprite):
@@ -62,19 +74,19 @@ class Player(pygame.sprite.Sprite):
 class Rock(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image_ori = rock_img
+        self.image_ori = random.choice(rock_imgs)
         self.image_ori.set_colorkey(BLACK)
         self.image = self.image_ori.copy()
 
         self.rect = self.image.get_rect()
-        self.radius = self.rect.width * 0.85 / 2
-        #pygame.draw.circle(self.image, RED, self.rect.center, self.radius)
+        self.radius = int(self.rect.width * 0.85 / 2)
+        #pygame.draw.circle(self.image_ori, RED, self.rect.center, self.radius)
         self.rect.x = random.randrange(0, WIDTH - self.rect.width)
-        self.rect.y = random.randrange(-100, -40)
+        self.rect.y = random.randrange(-180, -100)
         self.speedy = random.randrange(2, 10)
         self.speedx = random.randrange(-3, 3)
         self.total_degree = 0
-        self.rot_degree = 3
+        self.rot_degree = random.randrange(-3, 3)
 
     def rotate(self):
         self.total_degree += self.rot_degree
@@ -123,7 +135,7 @@ for i in range(8):
     all_sprites.add(rock)
     rocks.add(rock)
 running = True
-
+score = 0
 # loop
 while running:
     clock.tick(FPS)
@@ -138,6 +150,7 @@ while running:
     all_sprites.update()
     bullet_hits = pygame.sprite.groupcollide(rocks, bullets, True, True)
     for hit in bullet_hits:
+        score += hit.radius
         r = Rock()
         all_sprites.add(r)
         rocks.add(r)
@@ -151,6 +164,7 @@ while running:
     screen.fill(BLACK)
     screen.blit(background_img, (0, 0))
     all_sprites.draw(screen)
+    draw_text(screen, str(score), 18, WIDTH/2, 10)
     pygame.display.update()
 
 pygame.quit()
