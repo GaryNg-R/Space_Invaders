@@ -8,6 +8,8 @@ HEIGHT = 600
 
 WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
+RED = (255, 0, 0)
+YELLOW = (255, 255, 0)
 
 #init and windeos
 pygame.init()
@@ -37,11 +39,56 @@ class Player(pygame.sprite.Sprite):
         if self.rect.left < 0:
             self.rect.left = 0
 
+    def shoot(self):
+        bullet = Bullet(self.rect.centerx, self.rect.top)
+        all_sprites.add(bullet)
+
+
+class Rock(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.Surface((30, 40))
+        self.image.fill(RED)
+        self.rect = self.image.get_rect()
+        self.rect.centerx = random.randrange(0, WIDTH - self.rect.width)
+        self.rect.bottom = random.randrange(-100, -40)
+        self.speedy = random.randrange(2, 10)
+        self.speedx = random.randrange(-3, 3)
+
+    def update(self):
+        self.rect.y += self.speedy
+        self.rect.x += self.speedx
+
+        if self.rect.top > HEIGHT or self.rect.left > WIDTH or self.rect.right < 0:
+            self.rect.centerx = random.randrange(0, WIDTH - self.rect.width)
+            self.rect.bottom = random.randrange(-100, -40)
+            self.speedy = random.randrange(2, 10)
+            self.speedx = random.randrange(-3, 3)
+
+
+class Bullet(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.Surface((10, 20))
+        self.image.fill(YELLOW)
+        self.rect = self.image.get_rect()
+        self.rect.centerx = x
+        self.rect.bottom = y
+        self.speedy = -10
+
+    def update(self):
+        self.rect.y += self.speedy
+        if self.rect.bottom < 0:
+            self.kill
+
 
 all_sprites = pygame.sprite.Group()
 player = Player()
 all_sprites.add(player)
 
+for i in range(8):
+    rock = Rock()
+    all_sprites.add(rock)
 
 running = True
 
@@ -52,6 +99,9 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                player.shoot()
 
     # update game
     all_sprites.update()
