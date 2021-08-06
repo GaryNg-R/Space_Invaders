@@ -36,6 +36,8 @@ class Player(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(player_img, (50, 38))
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
+        self.radius = 20
+        #pygame.draw.circle(self.image, RED, self.rect.center, self.radius)
         self.rect.centerx = WIDTH/2
         self.rect.bottom = HEIGHT - 10
         self.speedx = 8
@@ -52,7 +54,7 @@ class Player(pygame.sprite.Sprite):
             self.rect.left = 0
 
     def shoot(self):
-        bullet = Bullet(self.rect.centerx, self.rect.top)
+        bullet = Bullet(self.rect.center, self.rect.top)
         all_sprites.add(bullet)
         bullets.add(bullet)
 
@@ -63,8 +65,10 @@ class Rock(pygame.sprite.Sprite):
         self.image = rock_img
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
-        self.rect.centerx = random.randrange(0, WIDTH - self.rect.width)
-        self.rect.bottom = random.randrange(-100, -40)
+        self.radius = self.rect.width * 0.85 / 2
+        #pygame.draw.circle(self.image, RED, self.rect.center, self.radius)
+        self.rect.x = random.randrange(0, WIDTH - self.rect.width)
+        self.rect.y = random.randrange(-100, -40)
         self.speedy = random.randrange(2, 10)
         self.speedx = random.randrange(-3, 3)
 
@@ -125,9 +129,10 @@ while running:
         all_sprites.add(r)
         rocks.add(r)
 
-    # is_hit_by_rock = pygame.sprite.spritecollide(player, rocks, False)
-    # if is_hit_by_rock:
-    #     running = False
+    is_hit_by_rock = pygame.sprite.spritecollide(
+        player, rocks, False, pygame.sprite.collide_circle)
+    if is_hit_by_rock:
+        running = False
 
     # display game
     screen.fill(BLACK)
