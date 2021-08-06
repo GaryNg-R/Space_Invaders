@@ -12,8 +12,9 @@ GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 YELLOW = (255, 255, 0)
 
-#init and windeos
+# init and windeos
 pygame.init()
+pygame.mixer.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption('Space Invader')
 clock = pygame.time.Clock()
@@ -31,6 +32,16 @@ for i in range(7):
     rock_imgs.append(pygame.image.load(
         os.path.join("img", f"rock{i}.png")).convert())
 font_name = pygame.font.match_font('arial')
+# music
+shoot_sound = pygame.mixer.Sound(
+    os.path.join("sound", "shoot.wav"))
+expl_sounds = [pygame.mixer.Sound(
+    os.path.join("sound", "expl0.wav")),
+    pygame.mixer.Sound(
+    os.path.join("sound", "expl1.wav"))
+]
+pygame.mixer.music.load(os.path.join("sound", "background.ogg"))
+pygame.mixer.music.set_volume(0.3)
 
 
 def draw_text(surf, text, size, x, y):
@@ -42,6 +53,12 @@ def draw_text(surf, text, size, x, y):
     surf.blit(text_surface, text_rect)
 
 
+def add_new_rock():
+    r = Rock()
+    all_sprites.add(r)
+    rocks.add(r)
+
+
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
@@ -49,10 +66,11 @@ class Player(pygame.sprite.Sprite):
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
         self.radius = 20
-        #pygame.draw.circle(self.image, RED, self.rect.center, self.radius)
+        # pygame.draw.circle(self.image, RED, self.rect.center, self.radius)
         self.rect.centerx = WIDTH/2
         self.rect.bottom = HEIGHT - 10
         self.speedx = 8
+        self.health = 100
 
     def update(self):
         key_pressed = pygame.key.get_pressed()
@@ -69,6 +87,7 @@ class Player(pygame.sprite.Sprite):
         bullet = Bullet(self.rect.centerx, self.rect.top)
         all_sprites.add(bullet)
         bullets.add(bullet)
+        shoot_sound.play()
 
 
 class Rock(pygame.sprite.Sprite):
@@ -80,7 +99,7 @@ class Rock(pygame.sprite.Sprite):
 
         self.rect = self.image.get_rect()
         self.radius = int(self.rect.width * 0.85 / 2)
-        #pygame.draw.circle(self.image_ori, RED, self.rect.center, self.radius)
+        # pygame.draw.circle(self.image_ori, RED, self.rect.center, self.radius)
         self.rect.x = random.randrange(0, WIDTH - self.rect.width)
         self.rect.y = random.randrange(-180, -100)
         self.speedy = random.randrange(2, 10)
@@ -131,11 +150,11 @@ player = Player()
 all_sprites.add(player)
 
 for i in range(8):
-    rock = Rock()
-    all_sprites.add(rock)
-    rocks.add(rock)
+    add_new_rock()
 running = True
 score = 0
+pygame.mixer.music.play(-1)
+
 # loop
 while running:
     clock.tick(FPS)
@@ -150,15 +169,17 @@ while running:
     all_sprites.update()
     bullet_hits = pygame.sprite.groupcollide(rocks, bullets, True, True)
     for hit in bullet_hits:
+        random.choice(expl_sounds).play()
         score += hit.radius
-        r = Rock()
-        all_sprites.add(r)
-        rocks.add(r)
+        add_new_rock()
 
     is_hit_by_rock = pygame.sprite.spritecollide(
-        player, rocks, False, pygame.sprite.collide_circle)
-    if is_hit_by_rock:
-        running = False
+        player, rocks, True, pygame.sprite.collide_circle)
+    for hit in is_hit_by_rock:
+        player.health -= hit.radius
+        add_new_rock()
+        if player.health <= 0:
+            running = False
 
     # display game
     screen.fill(BLACK)
