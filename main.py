@@ -43,8 +43,7 @@ for i in range(9):
     expl_img.set_colorkey(BLACK)
     expl_anim['lg'].append(pygame.transform.scale(expl_img, (75, 75)))
     expl_anim['sm'].append(pygame.transform.scale(expl_img, (30, 30)))
-    player_expl_img = pygame.image.load(
-        os.path.join("img", f"player_expl{i}.png")).convert()
+    player_expl_img = pygame.image.load(os.path.join("img", f"player_expl{i}.png")).convert()
     player_expl_img.set_colorkey(BLACK)
     expl_anim['player'].append(player_expl_img)
 power_imgs = {}
