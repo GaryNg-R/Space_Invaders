@@ -36,16 +36,23 @@ for i in range(7):
 expl_anim = {}
 expl_anim['lg'] = []
 expl_anim['sm'] = []
+expl_anim['player'] = []
 for i in range(9):
     expl_img = pygame.image.load(
         os.path.join("img", f"expl{i}.png")).convert()
     expl_img.set_colorkey(BLACK)
     expl_anim['lg'].append(pygame.transform.scale(expl_img, (75, 75)))
     expl_anim['sm'].append(pygame.transform.scale(expl_img, (30, 30)))
+    player_expl_img = pygame.image.load(
+        os.path.join("img", f"player_expl{i}.png")).convert()
+    expl_img.set_colorkey(BLACK)
+    expl_anim['player'].append(player_expl_img)
 
 # Music
 shoot_sound = pygame.mixer.Sound(
     os.path.join("sound", "shoot.wav"))
+die_sound = pygame.mixer.Sound(
+    os.path.join("sound", "rumble.ogg"))
 expl_sounds = [pygame.mixer.Sound(
     os.path.join("sound", "expl0.wav")),
     pygame.mixer.Sound(
@@ -231,7 +238,10 @@ while running:
         all_sprites.add(expl)
         add_new_rock()
         if player.health <= 0:
-            running = False
+            die = Explosion(player.rect.center, 'player')
+            all_sprites.add(die)
+            die_sound.play()
+            #running = False
 
     # display game
     screen.fill(BLACK)
