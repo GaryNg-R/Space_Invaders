@@ -27,6 +27,8 @@ background_img = pygame.image.load(
     os.path.join("img", "background.png")).convert()
 player_img = pygame.image.load(
     os.path.join("img", "player.png")).convert()
+player_mini_img = pygame.transform.scale(player_img, (25, 19))
+player_mini_img.set_colorkey(BLACK)
 bullet_img = pygame.image.load(
     os.path.join("img", "bullet.png")).convert()
 rock_imgs = []
@@ -87,6 +89,14 @@ def draw_health(surf, hp, x, y):
     fill_rect = pygame.Rect(x, y, fill, BAR_HEIGHT)
     pygame.draw.rect(surf, GREEN, fill_rect)
     pygame.draw.rect(surf, WHITE, outline_rect, 2)
+
+
+def draw_lives(surf, lives, img, x, y):
+    for i in range(lives):
+        img_rect = img.get_rect()
+        img_rect.x = x + 32*i
+        img_rect.y = y
+        surf.blit(img, img_rect)
 
 
 class Player(pygame.sprite.Sprite):
@@ -266,6 +276,7 @@ while running:
     all_sprites.draw(screen)
     draw_text(screen, str(score), 18, WIDTH/2, 10)
     draw_health(screen, player.health, 5, 15)
+    draw_lives(screen, player.lives, player_mini_img, WIDTH - 100, 15)
     pygame.display.update()
 
 pygame.quit()
