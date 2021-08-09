@@ -19,8 +19,10 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption('Space Invader')
 clock = pygame.time.Clock()
 
+# Font
+font_name = pygame.font.match_font('arial')
 
-# load img
+# Img
 background_img = pygame.image.load(
     os.path.join("img", "background.png")).convert()
 player_img = pygame.image.load(
@@ -31,8 +33,17 @@ rock_imgs = []
 for i in range(7):
     rock_imgs.append(pygame.image.load(
         os.path.join("img", f"rock{i}.png")).convert())
-font_name = pygame.font.match_font('arial')
-# music
+expl_anim = {}
+expl_anim['lg'] = []
+expl_anim['sm'] = []
+for i in range(9):
+    expl_img = pygame.image.load(
+        os.path.join("img", f"expl{i}.png")).convert()
+    expl_img.set_colorkey(BLACK)
+    expl_anim['lg'].append(pygame.transform.scale(expl_img, (75, 75)))
+    expl_anim['sm'].append(pygame.transform.scale(expl_img, (30, 30)))
+
+# Music
 shoot_sound = pygame.mixer.Sound(
     os.path.join("sound", "shoot.wav"))
 expl_sounds = [pygame.mixer.Sound(
@@ -57,6 +68,18 @@ def add_new_rock():
     r = Rock()
     all_sprites.add(r)
     rocks.add(r)
+
+
+def draw_health(surf, hp, x, y):
+    if hp < 0:
+        hp = 0
+    BAR_LENGTH = 100
+    BAR_HEIGHT = 10
+    fill = (hp/100) * BAR_LENGTH
+    outline_rect = pygame.Rect(x, y, BAR_LENGTH, BAR_HEIGHT)
+    fill_rect = pygame.Rect(x, y, fill, BAR_HEIGHT)
+    pygame.draw.rect(surf, GREEN, fill_rect)
+    pygame.draw.rect(surf, WHITE, outline_rect, 2)
 
 
 class Player(pygame.sprite.Sprite):
@@ -143,6 +166,31 @@ class Bullet(pygame.sprite.Sprite):
             self.kill
 
 
+class Explosion(pygame.sprite.Sprite):
+    def __init__(self, center, size):
+        pygame.sprite.Sprite.__init__(self)
+        self.size = size
+        self.image = expl_anim[self.size][0]
+        self.rect = self.image.get_rect()
+        self.rect.center = center
+        self.frame = 0
+        self.last_update = pygame.time.get_ticks()
+        self.frame_rate = 50
+
+    def update(self):
+        now = pygame.time.get_ticks()
+        if now - self.last_update > self.frame_rate:
+            self.last_update = now
+            self.frame += 1
+            if self.frame == len(expl_anim[self.size]):
+                self.kill()
+            else:
+                self.image = expl_anim[self.size][self.frame]
+                center = self.rect.center
+                self.rect = self.image.get_rect()
+                self.rect.center = center
+
+
 all_sprites = pygame.sprite.Group()
 rocks = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
@@ -171,6 +219,8 @@ while running:
     for hit in bullet_hits:
         random.choice(expl_sounds).play()
         score += hit.radius
+        expl = Explosion(hit.rect.center, 'lg')
+        all_sprites.add(expl)
         add_new_rock()
 
     is_hit_by_rock = pygame.sprite.spritecollide(
@@ -186,6 +236,7 @@ while running:
     screen.blit(background_img, (0, 0))
     all_sprites.draw(screen)
     draw_text(screen, str(score), 18, WIDTH/2, 10)
+    draw_health(screen, player.health, 5, 15)
     pygame.display.update()
 
 pygame.quit()
