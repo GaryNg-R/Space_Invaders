@@ -227,6 +227,8 @@ while running:
         player, rocks, True, pygame.sprite.collide_circle)
     for hit in is_hit_by_rock:
         player.health -= hit.radius
+        expl = Explosion(hit.rect.center, 'sm')
+        all_sprites.add(expl)
         add_new_rock()
         if player.health <= 0:
             running = False
