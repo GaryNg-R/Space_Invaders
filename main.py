@@ -45,7 +45,7 @@ for i in range(9):
     expl_anim['sm'].append(pygame.transform.scale(expl_img, (30, 30)))
     player_expl_img = pygame.image.load(
         os.path.join("img", f"player_expl{i}.png")).convert()
-    expl_img.set_colorkey(BLACK)
+    player_expl_img.set_colorkey(BLACK)
     expl_anim['player'].append(player_expl_img)
 
 # Music
@@ -101,8 +101,15 @@ class Player(pygame.sprite.Sprite):
         self.rect.bottom = HEIGHT - 10
         self.speedx = 8
         self.health = 100
+        self.lives = 3
+        self.hidden = False
+        self.hidden_time = 3
 
     def update(self):
+        if self.hidden and pygame.time.get_ticks() - self.hidden_time > 1000:
+            self.hidden = False
+            self.rect.centerx = WIDTH/2
+            self.rect.bottom = HEIGHT - 10
         key_pressed = pygame.key.get_pressed()
         if key_pressed[pygame.K_d]:
             self.rect.x += self.speedx
@@ -114,10 +121,16 @@ class Player(pygame.sprite.Sprite):
             self.rect.left = 0
 
     def shoot(self):
-        bullet = Bullet(self.rect.centerx, self.rect.top)
-        all_sprites.add(bullet)
-        bullets.add(bullet)
-        shoot_sound.play()
+        if not(self.hidden):
+            bullet = Bullet(self.rect.centerx, self.rect.top)
+            all_sprites.add(bullet)
+            bullets.add(bullet)
+            shoot_sound.play()
+
+    def hide(self):
+        self.hidden = True
+        self.hidden_time = pygame.time.get_ticks()
+        self.rect.center = (WIDTH/2, HEIGHT+500)
 
 
 class Rock(pygame.sprite.Sprite):
@@ -238,10 +251,14 @@ while running:
         all_sprites.add(expl)
         add_new_rock()
         if player.health <= 0:
-            die = Explosion(player.rect.center, 'player')
-            all_sprites.add(die)
+            death_expl = Explosion(player.rect.center, 'player')
+            all_sprites.add(death_expl)
             die_sound.play()
-            #running = False
+            player.lives -= 1
+            player.health = 100
+            player.hide()
+    if player.lives == 0 and not(death_expl.alive()):
+        running = False
 
     # display game
     screen.fill(BLACK)
