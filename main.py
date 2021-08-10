@@ -20,7 +20,7 @@ pygame.display.set_caption('Space Invader')
 clock = pygame.time.Clock()
 
 # Font
-font_name = pygame.font.match_font('arial')
+font_name = os.path.join("font.ttf")
 
 # Img
 background_img = pygame.image.load(os.path.join("img", "background.png")).convert()
@@ -92,6 +92,20 @@ def draw_lives(surf, lives, img, x, y):
         img_rect.y = y
         surf.blit(img, img_rect)
 
+def draw_init():
+    screen.blit(background_img, (0, 0))
+    draw_text(screen, 'Space Invader', 64, WIDTH/2, HEIGHT/4)
+    draw_text(screen, '<- -> to move Space to shoot', 22, WIDTH/2, HEIGHT/2)
+    draw_text(screen, 'Pree any key to start!', 18, WIDTH/2, HEIGHT*3/4)
+    pygame.display.update()
+    waitting = True
+    while waitting:
+        clock.tick(FPS)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+            elif event.type == pygame.KEYUP:
+                waitting = False
 
 class Player(pygame.sprite.Sprite):
     def __init__(self):
@@ -260,12 +274,27 @@ all_sprites.add(player)
 
 for i in range(8):
     add_new_rock()
+show_init = True
 running = True
 score = 0
 pygame.mixer.music.play(-1)
 
 # loop
 while running:
+    if show_init:
+        draw_init()
+        all_sprites = pygame.sprite.Group()
+        rocks = pygame.sprite.Group()
+        bullets = pygame.sprite.Group()
+        powers = pygame.sprite.Group()
+        player = Player()
+        all_sprites.add(player)
+        for i in range(8):
+            add_new_rock()
+        show_init = True
+        running = True
+        score = 0
+        show_init = False
     clock.tick(FPS)
     # get input
     for event in pygame.event.get():
@@ -317,7 +346,7 @@ while running:
             gun_sound.play()
 
     if player.lives == 0 and not(death_expl.alive()):
-        running = False
+        show_init = True
 
     # display game
     screen.fill(BLACK)
